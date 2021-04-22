@@ -1,1 +1,15 @@
-﻿  CudaFFT.vcxproj -> C:\Users\Tyler Heers\Documents\repos\CudaFFT\x64\Debug\CudaFFT.dll
+﻿  Compiling CUDA source file kernel.cu...
+  
+  C:\Users\Tyler Heers\Documents\repos\UnityCudaFFT\CudaFFT\CudaFFT>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.2\bin\nvcc.exe" -gencode=arch=compute_52,code=\"sm_52,compute_52\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\bin\HostX86\x64" -x cu   -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.2\include"  -G   --keep-dir x64\Debug  -maxrregcount=0  --machine 64 --compile -cudart shared  -g  -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_WINDLL -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Fdx64\Debug\vc142.pdb /FS /Zi /RTC1 /MDd " -o x64\Debug\kernel.cu.obj "C:\Users\Tyler Heers\Documents\repos\UnityCudaFFT\CudaFFT\CudaFFT\kernel.cu" 
+  math_functions.h is an internal header file and must not be used directly.  This file will be removed in a future CUDA release.  Please use cuda_runtime_api.h or cuda_runtime.h instead.
+C:/Users/Tyler Heers/Documents/repos/UnityCudaFFT/CudaFFT/CudaFFT/kernel.cu(12): warning : taking the address of a temporary
+  
+C:/Users/Tyler Heers/Documents/repos/UnityCudaFFT/CudaFFT/CudaFFT/kernel.cu(21): warning : taking the address of a temporary
+  
+C:/Users/Tyler Heers/Documents/repos/UnityCudaFFT/CudaFFT/CudaFFT/kernel.cu(12): warning : taking the address of a temporary
+  
+C:/Users/Tyler Heers/Documents/repos/UnityCudaFFT/CudaFFT/CudaFFT/kernel.cu(21): warning : taking the address of a temporary
+  
+  kernel.cu
+  math_functions.h is an internal header file and must not be used directly.  This file will be removed in a future CUDA release.  Please use cuda_runtime_api.h or cuda_runtime.h instead.
+  CudaFFT.vcxproj -> C:\Users\Tyler Heers\Documents\repos\UnityCudaFFT\CudaFFT\x64\Debug\CudaFFT.dll

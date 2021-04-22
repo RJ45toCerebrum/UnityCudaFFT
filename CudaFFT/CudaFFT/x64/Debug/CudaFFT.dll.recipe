@@ -2,7 +2,7 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Users\Tyler Heers\Documents\repos\CudaFFT\x64\Debug\CudaFFT.dll</FullPath>
+      <FullPath>C:\Users\Tyler Heers\Documents\repos\UnityCudaFFT\CudaFFT\x64\Debug\CudaFFT.dll</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />

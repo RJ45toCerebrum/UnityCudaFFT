@@ -3,18 +3,8 @@
 #include "IUnityInterface.h"
 #include "DebugDLL.h"
 #include <cufft.h>
+#include <math_functions.h>
 #include <stdio.h>
-
-cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size);
-std::unique_ptr<int[]> getAArray(const unsigned int size);
-std::unique_ptr<int[]> getBArray(const unsigned int size);
-
-
-__global__ void addKernel(int *c, const int *a, const int *b)
-{
-    int i = threadIdx.x;
-    c[i] = a[i] + b[i];
-}
 
 inline static bool debugError(cudaError_t error, const char* msg) {
     if (error != cudaSuccess) {
@@ -41,7 +31,9 @@ extern "C"
     {
         DebugDLL::clear();
 
-        const unsigned int arraySize = 1024;
+        if (data == nullptr) {
+            return -1;
+        }
 
         cufftHandle plan;
         cufftComplex* complexHostData;
@@ -50,29 +42,32 @@ extern "C"
         cufftResult result;
         cudaError_t error;
 
+        const int byteSize = sizeof(cufftComplex) * size;
+
         // init host data
-        complexHostData = (cufftComplex*)malloc(sizeof(cufftComplex) * size);
+        complexHostData = (cufftComplex*)malloc(byteSize);
         for (int i = 0; i < size; i++)
             complexHostData[i] = make_cuFloatComplex(data[i], 0);
 
 
         // create device data
-        error = cudaMalloc((void**)&complexDeviceData, sizeof(cufftComplex) * size);
+        error = cudaMalloc((void**)&complexDeviceData, byteSize);
         if (debugError(error, "Unable to cudaMalloc complexData")) {
             goto CUDA_MALLOC_ERROR;
         }
+
 
         result = cufftPlan1d(&plan, size, CUFFT_C2C, 1);
         if (debugResult(result, "cufftPlan1d Failed")) {
             goto CUFFT_PLAN_ERROR;
         }
 
-        error = cudaMemcpy((void*)complexDeviceData, complexHostData, sizeof(cufftComplex) * size, cudaMemcpyHostToDevice);
+        error = cudaMemcpy((void*)complexDeviceData, complexHostData, byteSize, cudaMemcpyHostToDevice);
         if (debugError(error, "cudaMemcpy Host => Device failed")) {
             goto CPY_TO_DEVICE_ERR;
         }
 
-        cufftResult result = cufftExecC2C(plan, complexDeviceData, complexDeviceData, CUFFT_FORWARD);
+        result = cufftExecC2C(plan, complexDeviceData, complexDeviceData, CUFFT_FORWARD);
         if (debugResult(result, "cufftExecC2R failed")) {
             goto CUFFT_EXEC_ERR;
         }
@@ -82,17 +77,13 @@ extern "C"
             goto DEVICE_SYNCH_ERR;
         }
 
-        error = cudaMemcpy((void*)complexHostData, complexDeviceData, sizeof(cufftComplex) * size, cudaMemcpyDeviceToHost);
+        error = cudaMemcpy((void*)complexHostData, complexDeviceData, byteSize, cudaMemcpyDeviceToHost);
         if (debugError(error, "cudaMemcpy Device => Host failed")) {
             goto CPY_TO_HOST_ERR;
         }
 
-
-        DebugDLL::ss << "Device Copy Success! Value[777777]: {" << complexHostData[777777].x << "," << complexHostData[777777].y << "}";
-        DebugDLL::log(&DebugDLL::ss.str(), Color::Blue);
-
         
-        // ...
+        // free plan data
         result = cufftDestroy(plan);
         if (debugResult(result, "cufftDestroy failed")) {
             return -7;
@@ -103,40 +94,16 @@ extern "C"
             return -8;
         }
 
-        free(complexHostData);
-
-        /*
-        auto a = getAArray(arraySize);
-        auto b = getBArray(arraySize);
-
-        int c[arraySize] = {0};
-
-       
-        // Add vectors in parallel
-        cudaError_t cudaStatus = addWithCuda(c, a.get(), b.get(), arraySize);
-
-        if (cudaStatus != cudaSuccess) {
-            DebugDLL::ss << "addWithCuda failed!";
-            DebugDLL::log(&DebugDLL::ss.str(), Color::Red);
-            return -4;
+        for (int i = 0; i < size; i++) {
+            auto complexNumber = complexHostData[i];
+            data[i] = sqrt(complexNumber.x * complexNumber.x + complexNumber.y * complexNumber.y);
         }
 
-       
-        DebugDLL::ss << "data[1000000]: " << data[1000000];
-        DebugDLL::log(&DebugDLL::ss.str(), Color::Blue);
-        */
-
-        // cudaDeviceReset must be called before exiting in order for profiling and
-        // tracing tools such as Nsight and Visual Profiler to show complete traces.
-        //cudaError_t cudaStatus = cudaDeviceReset();
-        //if (cudaStatus != cudaSuccess) {
-        //    DebugDLL::ss << "cudaDeviceReset failed!";
-        //    DebugDLL::log(&DebugDLL::ss.str(), Color::Red);
-        //    return -5;
-        //}
-
+        free(complexHostData);
 
         return 0;
+
+
 
     CUDA_MALLOC_ERROR:
         free(complexHostData);
@@ -179,6 +146,12 @@ extern "C"
     }
 }
 
+/*
+__global__ void addKernel(int* c, const int* a, const int* b)
+{
+    int i = threadIdx.x;
+    c[i] = a[i] + b[i];
+}
 
 // Helper function for using CUDA to add vectors in parallel
 cudaError_t addWithCuda(int* c, const int* a, const int* b, unsigned int size)
@@ -278,3 +251,4 @@ std::unique_ptr<int[]> getBArray(const unsigned int size) {
     }
     return a;
 }
+*/
